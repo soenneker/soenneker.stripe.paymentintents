@@ -2,16 +2,21 @@ using Soenneker.Stripe.PaymentIntents.Abstract;
 using Soenneker.Tests.FixturedUnit;
 using Xunit;
 
-
 namespace Soenneker.Stripe.PaymentIntents.Tests;
 
 [Collection("Collection")]
-public class StripePaymentPaymentIntentsUtilTests : FixturedUnitTest
+public class StripePaymentIntentsUtilTests : FixturedUnitTest
 {
     private readonly IStripePaymentIntentsUtil _util;
 
-    public StripePaymentPaymentIntentsUtilTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
+    public StripePaymentIntentsUtilTests(Fixture fixture, ITestOutputHelper output) : base(fixture, output)
     {
-        _util = Resolve<IStripePaymentIntentsUtil>();
+        _util = Resolve<IStripePaymentIntentsUtil>(true);
+    }
+
+    [Fact]
+    public void Default()
+    {
+
     }
 }

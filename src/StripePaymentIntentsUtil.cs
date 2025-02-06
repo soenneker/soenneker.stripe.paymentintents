@@ -22,8 +22,7 @@ public class StripePaymentPaymentIntentsUtil : IStripePaymentIntentsUtil
         {
             StripeClient client = await stripeUtil.Get(cancellationToken).NoSync();
 
-            var service = new PaymentIntentService(client);
-            return service;
+            return new PaymentIntentService(client);
         });
     }
 
@@ -40,16 +39,12 @@ public class StripePaymentPaymentIntentsUtil : IStripePaymentIntentsUtil
             }
         };
 
-        PaymentIntent response = await (await _service.Get(cancellationToken).NoSync()).CreateAsync(options, cancellationToken: cancellationToken).NoSync();
-
-        return response;
+        return await (await _service.Get(cancellationToken).NoSync()).CreateAsync(options, cancellationToken: cancellationToken).NoSync();
     }
 
     public async ValueTask<PaymentIntent> Get(string id, CancellationToken cancellationToken = default)
     {
-        PaymentIntent response = await (await _service.Get(cancellationToken).NoSync()).GetAsync(id, cancellationToken: cancellationToken).NoSync();
-
-        return response;
+        return await (await _service.Get(cancellationToken).NoSync()).GetAsync(id, cancellationToken: cancellationToken).NoSync();
     }
 
     public async ValueTask<PaymentIntent> Update(string id, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
@@ -59,9 +54,7 @@ public class StripePaymentPaymentIntentsUtil : IStripePaymentIntentsUtil
             Metadata = metadata
         };
 
-        PaymentIntent response = await (await _service.Get(cancellationToken).NoSync()).UpdateAsync(id, options, cancellationToken: cancellationToken).NoSync();
-
-        return response;
+        return await (await _service.Get(cancellationToken).NoSync()).UpdateAsync(id, options, cancellationToken: cancellationToken).NoSync();
     }
 
     public async ValueTask<PaymentIntent> Confirm(string id, string returnUrl, CancellationToken cancellationToken = default)
@@ -71,9 +64,7 @@ public class StripePaymentPaymentIntentsUtil : IStripePaymentIntentsUtil
             ReturnUrl = returnUrl
         };
 
-        PaymentIntent response = await (await _service.Get(cancellationToken).NoSync()).ConfirmAsync(id, options, cancellationToken: cancellationToken).NoSync();
-
-        return response;
+        return await (await _service.Get(cancellationToken).NoSync()).ConfirmAsync(id, options, cancellationToken: cancellationToken).NoSync();
     }
 
     public void Dispose()

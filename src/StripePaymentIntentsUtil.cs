@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Soenneker.Extensions.String;
 using Soenneker.Extensions.Task;
 using Soenneker.Extensions.ValueTask;
 using Soenneker.Stripe.Client.Abstract;
@@ -34,18 +35,25 @@ public class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
             Amount = (long) (amount * 100),
             Currency = "usd",
             Customer = stripeCustomerId,
-            AutomaticPaymentMethods = automaticPaymentMethods
+            AutomaticPaymentMethods = automaticPaymentMethods ?? new PaymentIntentAutomaticPaymentMethodsOptions
+            {
+                Enabled = true
+            }
         };
 
         if (paymentMethodTypes != null)
-            options.PaymentMethodTypes = [..paymentMethodTypes];
+            options.PaymentMethodTypes = [.. paymentMethodTypes];
+
+        PaymentIntentService service = await _paymentIntentService.Get(cancellationToken).NoSync();
+
+        if (idempotencyKey.IsNullOrEmpty())
+            return await service.CreateAsync(options, cancellationToken: cancellationToken).NoSync();
 
         var requestOptions = new RequestOptions
         {
             IdempotencyKey = idempotencyKey
         };
 
-        PaymentIntentService service = await _paymentIntentService.Get(cancellationToken).NoSync();
         return await service.CreateAsync(options, requestOptions, cancellationToken).NoSync();
     }
 

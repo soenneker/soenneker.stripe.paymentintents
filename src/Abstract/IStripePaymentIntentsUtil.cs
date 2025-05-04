@@ -8,43 +8,72 @@ using Stripe;
 namespace Soenneker.Stripe.PaymentIntents.Abstract;
 
 /// <summary>
-/// A .NET typesafe implementation of Stripe's Payment Intents API for creating, retrieving, confirming, and updating payment intents.
+/// A utility for interacting with Stripe Payment Intents, supporting creation, update, confirmation, capture, cancelation, and listing operations.
 /// </summary>
 public interface IStripePaymentIntentsUtil : IAsyncDisposable, IDisposable
 {
     /// <summary>
-    /// Creates a new PaymentIntent for a specified customer with a given amount.
+    /// Creates a new Stripe PaymentIntent for a customer with optional idempotency and method configurations.
     /// </summary>
-    /// <param name="stripeCustomerId">The unique identifier for the Stripe customer.</param>
-    /// <param name="amount">The amount for the PaymentIntent, in the smallest currency unit (e.g., cents for USD).</param>
-    /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask{PaymentIntent}"/> that represents the asynchronous operation, containing the created PaymentIntent.</returns>
-    ValueTask<PaymentIntent> Create(string stripeCustomerId, decimal amount, CancellationToken cancellationToken = default);
+    /// <param name="stripeCustomerId">The Stripe customer ID associated with the PaymentIntent.</param>
+    /// <param name="amount">The amount in USD dollars (will be converted to cents).</param>
+    /// <param name="idempotencyKey">Optional idempotency key to prevent duplicate PaymentIntents during retries.</param>
+    /// <param name="paymentMethodTypes">Optional specific payment method types (e.g. "card").</param>
+    /// <param name="automaticPaymentMethods">Optional configuration for automatic payment method detection.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The created PaymentIntent.</returns>
+    ValueTask<PaymentIntent> Create(string stripeCustomerId, decimal amount, string? idempotencyKey = null, IEnumerable<string>? paymentMethodTypes = null,
+        PaymentIntentAutomaticPaymentMethodsOptions? automaticPaymentMethods = null, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Retrieves an existing PaymentIntent by its unique identifier.
+    /// Retrieves a PaymentIntent by its ID.
     /// </summary>
-    /// <param name="id">The unique identifier of the PaymentIntent to retrieve.</param>
-    /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask{PaymentIntent}"/> that represents the asynchronous operation, containing the retrieved PaymentIntent.</returns>
+    /// <param name="id">The ID of the PaymentIntent.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The retrieved PaymentIntent.</returns>
     [Pure]
     ValueTask<PaymentIntent> Get(string id, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Confirms an existing PaymentIntent, typically when the customer is redirected back after authentication.
+    /// Updates metadata for a PaymentIntent.
     /// </summary>
-    /// <param name="id">The unique identifier of the PaymentIntent to confirm.</param>
-    /// <param name="returnUrl">The URL to redirect the customer to after confirmation.</param>
-    /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask{PaymentIntent}"/> that represents the asynchronous operation, containing the confirmed PaymentIntent.</returns>
+    /// <param name="id">The ID of the PaymentIntent.</param>
+    /// <param name="metadata">The metadata key-value pairs to set.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The updated PaymentIntent.</returns>
+    ValueTask<PaymentIntent> Update(string id, Dictionary<string, string> metadata, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Confirms a PaymentIntent, typically as part of a client-side or redirect flow.
+    /// </summary>
+    /// <param name="id">The ID of the PaymentIntent to confirm.</param>
+    /// <param name="returnUrl">The URL to redirect the customer after confirmation (if applicable).</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The confirmed PaymentIntent.</returns>
     ValueTask<PaymentIntent> Confirm(string id, string returnUrl, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Updates an existing PaymentIntent with additional metadata.
+    /// Cancels a PaymentIntent before it is captured or confirmed.
     /// </summary>
-    /// <param name="id">The unique identifier of the PaymentIntent to update.</param>
-    /// <param name="metadata">A dictionary of metadata to attach to the PaymentIntent.</param>
-    /// <param name="cancellationToken">An optional token to cancel the operation.</param>
-    /// <returns>A <see cref="ValueTask{PaymentIntent}"/> that represents the asynchronous operation, containing the updated PaymentIntent.</returns>
-    ValueTask<PaymentIntent> Update(string id, Dictionary<string, string> metadata, CancellationToken cancellationToken = default);
+    /// <param name="id">The ID of the PaymentIntent to cancel.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The canceled PaymentIntent.</returns>
+    ValueTask<PaymentIntent> Cancel(string id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Captures a previously confirmed PaymentIntent that was created with manual capture enabled.
+    /// </summary>
+    /// <param name="id">The ID of the PaymentIntent to capture.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>The captured PaymentIntent.</returns>
+    ValueTask<PaymentIntent> Capture(string id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Retrieves a list of PaymentIntents for a specific customer.
+    /// </summary>
+    /// <param name="customerId">The Stripe customer ID to filter the PaymentIntents.</param>
+    /// <param name="cancellationToken">Optional cancellation token.</param>
+    /// <returns>A collection of PaymentIntents.</returns>
+    [Pure]
+    ValueTask<IEnumerable<PaymentIntent>> List(string customerId, CancellationToken cancellationToken = default);
 }

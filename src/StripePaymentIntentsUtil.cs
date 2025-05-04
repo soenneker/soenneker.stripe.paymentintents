@@ -12,39 +12,47 @@ using Stripe;
 namespace Soenneker.Stripe.PaymentIntents;
 
 ///<inheritdoc cref="IStripePaymentIntentsUtil"/>
-public class StripePaymentPaymentIntentsUtil : IStripePaymentIntentsUtil
+public class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
 {
-    private readonly AsyncSingleton<PaymentIntentService> _service;
+    private readonly AsyncSingleton<PaymentIntentService> _paymentIntentService;
 
-    public StripePaymentPaymentIntentsUtil(IStripeClientUtil stripeUtil)
+    public StripePaymentIntentsUtil(IStripeClientUtil stripeUtil)
     {
-        _service = new AsyncSingleton<PaymentIntentService>(async (cancellationToken, _) =>
+        _paymentIntentService = new AsyncSingleton<PaymentIntentService>(async (cancellationToken, _) =>
         {
             StripeClient client = await stripeUtil.Get(cancellationToken).NoSync();
-
             return new PaymentIntentService(client);
         });
     }
 
-    public async ValueTask<PaymentIntent> Create(string stripeCustomerId, decimal amount, CancellationToken cancellationToken = default)
+    public async ValueTask<PaymentIntent> Create(string stripeCustomerId, decimal amount, string? idempotencyKey = null,
+        IEnumerable<string>? paymentMethodTypes = null, PaymentIntentAutomaticPaymentMethodsOptions? automaticPaymentMethods = null,
+        CancellationToken cancellationToken = default)
     {
         var options = new PaymentIntentCreateOptions
         {
-            Amount = (long)(amount * 100),
+            Amount = (long) (amount * 100),
             Currency = "usd",
             Customer = stripeCustomerId,
-            AutomaticPaymentMethods = new PaymentIntentAutomaticPaymentMethodsOptions
-            {
-                Enabled = true
-            }
+            AutomaticPaymentMethods = automaticPaymentMethods
         };
 
-        return await (await _service.Get(cancellationToken).NoSync()).CreateAsync(options, cancellationToken: cancellationToken).NoSync();
+        if (paymentMethodTypes != null)
+            options.PaymentMethodTypes = [..paymentMethodTypes];
+
+        var requestOptions = new RequestOptions
+        {
+            IdempotencyKey = idempotencyKey
+        };
+
+        PaymentIntentService service = await _paymentIntentService.Get(cancellationToken).NoSync();
+        return await service.CreateAsync(options, requestOptions, cancellationToken).NoSync();
     }
 
     public async ValueTask<PaymentIntent> Get(string id, CancellationToken cancellationToken = default)
     {
-        return await (await _service.Get(cancellationToken).NoSync()).GetAsync(id, cancellationToken: cancellationToken).NoSync();
+        PaymentIntentService service = await _paymentIntentService.Get(cancellationToken).NoSync();
+        return await service.GetAsync(id, cancellationToken: cancellationToken).NoSync();
     }
 
     public async ValueTask<PaymentIntent> Update(string id, Dictionary<string, string> metadata, CancellationToken cancellationToken = default)
@@ -54,7 +62,8 @@ public class StripePaymentPaymentIntentsUtil : IStripePaymentIntentsUtil
             Metadata = metadata
         };
 
-        return await (await _service.Get(cancellationToken).NoSync()).UpdateAsync(id, options, cancellationToken: cancellationToken).NoSync();
+        PaymentIntentService service = await _paymentIntentService.Get(cancellationToken).NoSync();
+        return await service.UpdateAsync(id, options, cancellationToken: cancellationToken).NoSync();
     }
 
     public async ValueTask<PaymentIntent> Confirm(string id, string returnUrl, CancellationToken cancellationToken = default)
@@ -64,20 +73,44 @@ public class StripePaymentPaymentIntentsUtil : IStripePaymentIntentsUtil
             ReturnUrl = returnUrl
         };
 
-        return await (await _service.Get(cancellationToken).NoSync()).ConfirmAsync(id, options, cancellationToken: cancellationToken).NoSync();
+        PaymentIntentService service = await _paymentIntentService.Get(cancellationToken).NoSync();
+        return await service.ConfirmAsync(id, options, cancellationToken: cancellationToken).NoSync();
+    }
+
+    public async ValueTask<PaymentIntent> Cancel(string id, CancellationToken cancellationToken = default)
+    {
+        PaymentIntentService service = await _paymentIntentService.Get(cancellationToken).NoSync();
+        return await service.CancelAsync(id, cancellationToken: cancellationToken).NoSync();
+    }
+
+    public async ValueTask<PaymentIntent> Capture(string id, CancellationToken cancellationToken = default)
+    {
+        PaymentIntentService service = await _paymentIntentService.Get(cancellationToken).NoSync();
+        return await service.CaptureAsync(id, cancellationToken: cancellationToken).NoSync();
+    }
+
+    public async ValueTask<IEnumerable<PaymentIntent>> List(string customerId, CancellationToken cancellationToken = default)
+    {
+        var options = new PaymentIntentListOptions
+        {
+            Customer = customerId,
+            Limit = 100
+        };
+
+        PaymentIntentService service = await _paymentIntentService.Get(cancellationToken).NoSync();
+        return await service.ListAsync(options, cancellationToken: cancellationToken).NoSync();
     }
 
     public void Dispose()
     {
         GC.SuppressFinalize(this);
-
-        _service.Dispose();
+        _paymentIntentService.Dispose();
     }
 
-    public ValueTask DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         GC.SuppressFinalize(this);
 
-        return _service.DisposeAsync();
+        await _paymentIntentService.DisposeAsync();
     }
 }

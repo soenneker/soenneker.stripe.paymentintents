@@ -1,4 +1,4 @@
-# Contributing to Soenneker.Stripe.PaymentIntents
+﻿# Contributing to Soenneker.Stripe.PaymentIntents
 
 We're excited that you're interested in contributing!
 

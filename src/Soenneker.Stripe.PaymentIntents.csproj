@@ -43,6 +43,6 @@
 
     <ItemGroup>
 
-        <PackageReference Include="Soenneker.Stripe.Client" Version="3.0.1011" />
+        <PackageReference Include="Soenneker.Stripe.Client" Version="3.0.1013" />
     </ItemGroup>
 </Project>

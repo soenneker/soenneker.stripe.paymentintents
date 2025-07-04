@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Soenneker.Enums.CurrencyCodes;
 using Soenneker.Extensions.String;
 using Soenneker.Extensions.Task;
 using Soenneker.Extensions.ValueTask;
@@ -13,7 +14,7 @@ using Stripe;
 namespace Soenneker.Stripe.PaymentIntents;
 
 ///<inheritdoc cref="IStripePaymentIntentsUtil"/>
-public class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
+public sealed class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
 {
     private readonly AsyncSingleton<PaymentIntentService> _paymentIntentService;
 
@@ -33,7 +34,7 @@ public class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
         var options = new PaymentIntentCreateOptions
         {
             Amount = (long) (amount * 100),
-            Currency = "usd",
+            Currency = CurrencyCode.Usd,
             Customer = stripeCustomerId,
             AutomaticPaymentMethods = automaticPaymentMethods ?? new PaymentIntentAutomaticPaymentMethodsOptions
             {
@@ -111,14 +112,11 @@ public class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
 
     public void Dispose()
     {
-        GC.SuppressFinalize(this);
         _paymentIntentService.Dispose();
     }
 
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        GC.SuppressFinalize(this);
-
-        await _paymentIntentService.DisposeAsync();
+        return _paymentIntentService.DisposeAsync();
     }
 }

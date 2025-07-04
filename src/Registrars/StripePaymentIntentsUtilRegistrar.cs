@@ -15,8 +15,7 @@ public static class StripePaymentIntentsUtilRegistrar
     /// </summary>
     public static IServiceCollection AddStripePaymentIntentsUtilAsSingleton(this IServiceCollection services)
     {
-        services.AddStripeClientUtilAsSingleton()
-                .TryAddSingleton<IStripePaymentIntentsUtil, StripePaymentIntentsUtil>();
+        services.AddStripeClientUtilAsSingleton().TryAddSingleton<IStripePaymentIntentsUtil, StripePaymentIntentsUtil>();
 
         return services;
     }
@@ -26,8 +25,7 @@ public static class StripePaymentIntentsUtilRegistrar
     /// </summary>
     public static IServiceCollection AddStripePaymentIntentsUtilAsScoped(this IServiceCollection services)
     {
-        services.AddStripeClientUtilAsSingleton()
-                .TryAddScoped<IStripePaymentIntentsUtil, StripePaymentIntentsUtil>();
+        services.AddStripeClientUtilAsSingleton().TryAddScoped<IStripePaymentIntentsUtil, StripePaymentIntentsUtil>();
 
         return services;
     }

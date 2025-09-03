@@ -43,6 +43,6 @@
 
     <ItemGroup>
         <PackageReference Include="Soenneker.Enums.CurrencyCodes" Version="3.0.13" />
-        <PackageReference Include="Soenneker.Stripe.Client" Version="3.0.1087" />
+        <PackageReference Include="Soenneker.Stripe.Client" Version="3.0.1091" />
     </ItemGroup>
 </Project>

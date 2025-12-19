@@ -20,7 +20,7 @@ public sealed class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
 
     public StripePaymentIntentsUtil(IStripeClientUtil stripeUtil)
     {
-        _paymentIntentService = new AsyncSingleton<PaymentIntentService>(async (cancellationToken, _) =>
+        _paymentIntentService = new AsyncSingleton<PaymentIntentService>(async cancellationToken =>
         {
             StripeClient client = await stripeUtil.Get(cancellationToken).NoSync();
             return new PaymentIntentService(client);

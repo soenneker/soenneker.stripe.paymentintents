@@ -17,14 +17,19 @@ namespace Soenneker.Stripe.PaymentIntents;
 public sealed class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
 {
     private readonly AsyncSingleton<PaymentIntentService> _paymentIntentService;
+    private readonly IStripeClientUtil _stripeUtil;
 
     public StripePaymentIntentsUtil(IStripeClientUtil stripeUtil)
     {
-        _paymentIntentService = new AsyncSingleton<PaymentIntentService>(async cancellationToken =>
-        {
-            StripeClient client = await stripeUtil.Get(cancellationToken).NoSync();
-            return new PaymentIntentService(client);
-        });
+        _stripeUtil = stripeUtil;
+        _paymentIntentService = new AsyncSingleton<PaymentIntentService>(CreateService);
+    }
+
+    private async ValueTask<PaymentIntentService> CreateService(CancellationToken cancellationToken)
+    {
+        StripeClient client = await _stripeUtil.Get(cancellationToken)
+                                               .NoSync();
+        return new PaymentIntentService(client);
     }
 
     public async ValueTask<PaymentIntent> Create(string stripeCustomerId, decimal amount, string? idempotencyKey = null,

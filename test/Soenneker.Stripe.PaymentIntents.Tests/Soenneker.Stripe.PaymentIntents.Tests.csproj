@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Soenneker.Stripe.PaymentIntents.csproj" />
+        <ProjectReference Include="..\..\src\Soenneker.Stripe.PaymentIntents\Soenneker.Stripe.PaymentIntents.csproj" />
     </ItemGroup>
 
     <ItemGroup>

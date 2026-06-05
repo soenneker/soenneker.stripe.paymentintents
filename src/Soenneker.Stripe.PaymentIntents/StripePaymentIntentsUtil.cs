@@ -115,11 +115,18 @@ public sealed class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
         return await service.ListAsync(options, cancellationToken: cancellationToken).NoSync();
     }
 
+    /// <summary>
+    /// Releases resources used by the current instance.
+    /// </summary>
     public void Dispose()
     {
         _paymentIntentService.Dispose();
     }
 
+    /// <summary>
+    /// Asynchronously releases resources used by the current instance.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
     public ValueTask DisposeAsync()
     {
         return _paymentIntentService.DisposeAsync();

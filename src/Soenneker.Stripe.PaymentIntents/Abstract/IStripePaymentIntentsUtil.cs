@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Threading;
 using System.Threading.Tasks;
 using Stripe;
@@ -8,18 +7,28 @@ using Stripe;
 namespace Soenneker.Stripe.PaymentIntents.Abstract;
 
 /// <summary>
-/// A utility for interacting with Stripe Payment Intents, supporting creation, update, confirmation, capture, cancelation, and listing operations.
+/// Creates and manages Stripe payment intents for customer payments.
 /// </summary>
 public interface IStripePaymentIntentsUtil : IAsyncDisposable, IDisposable
 {
     /// <summary>
+    /// Releases the lazily initialized payment-intent service owned by this utility.
+    /// </summary>
+    new void Dispose();
+
+    /// <summary>
+    /// Asynchronously releases the lazily initialized payment-intent service owned by this utility.
+    /// </summary>
+    new ValueTask DisposeAsync();
+
+    /// <summary>
     /// Creates a new Stripe PaymentIntent for a customer with optional idempotency and method configurations.
     /// </summary>
     /// <param name="stripeCustomerId">The Stripe customer ID associated with the PaymentIntent.</param>
-    /// <param name="amount">The amount in USD dollars (will be converted to cents).</param>
+    /// <param name="amount">The amount in USD dollars. Fractional cents are rounded away from zero.</param>
     /// <param name="idempotencyKey">Optional idempotency key to prevent duplicate PaymentIntents during retries.</param>
     /// <param name="paymentMethodTypes">Optional specific payment method types (e.g. "card").</param>
-    /// <param name="automaticPaymentMethods">Optional configuration for automatic payment method detection.</param>
+    /// <param name="automaticPaymentMethods">Optional configuration for automatic payment-method detection. Ignored when <paramref name="paymentMethodTypes"/> is supplied.</param>
     /// <param name="cancellationToken">Optional cancellation token.</param>
     /// <returns>The created PaymentIntent.</returns>
     ValueTask<PaymentIntent> Create(string stripeCustomerId, decimal amount, string? idempotencyKey = null, IEnumerable<string>? paymentMethodTypes = null,
@@ -31,7 +40,6 @@ public interface IStripePaymentIntentsUtil : IAsyncDisposable, IDisposable
     /// <param name="id">The ID of the PaymentIntent.</param>
     /// <param name="cancellationToken">Optional cancellation token.</param>
     /// <returns>The retrieved PaymentIntent.</returns>
-    [Pure]
     ValueTask<PaymentIntent> Get(string id, CancellationToken cancellationToken = default);
 
     /// <summary>
@@ -73,7 +81,6 @@ public interface IStripePaymentIntentsUtil : IAsyncDisposable, IDisposable
     /// </summary>
     /// <param name="customerId">The Stripe customer ID to filter the PaymentIntents.</param>
     /// <param name="cancellationToken">Optional cancellation token.</param>
-    /// <returns>A collection of PaymentIntents.</returns>
-    [Pure]
+    /// <returns>The first page of PaymentIntents, limited to 100 items.</returns>
     ValueTask<IEnumerable<PaymentIntent>> List(string customerId, CancellationToken cancellationToken = default);
 }

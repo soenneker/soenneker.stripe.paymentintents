@@ -6,7 +6,7 @@ using Soenneker.Stripe.PaymentIntents.Abstract;
 namespace Soenneker.Stripe.PaymentIntents.Registrars;
 
 /// <summary>
-/// A .NET typesafe implementation of Stripe's Payment Intents API
+/// Registers Stripe payment-intent operations.
 /// </summary>
 public static class StripePaymentIntentsUtilRegistrar
 {

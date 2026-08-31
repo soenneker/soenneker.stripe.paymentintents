@@ -13,7 +13,6 @@ using Stripe;
 
 namespace Soenneker.Stripe.PaymentIntents;
 
-///<inheritdoc cref="IStripePaymentIntentsUtil"/>
 public sealed class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
 {
     private readonly AsyncSingleton<PaymentIntentService> _paymentIntentService;
@@ -38,17 +37,18 @@ public sealed class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
     {
         var options = new PaymentIntentCreateOptions
         {
-            Amount = (long) (amount * 100),
+            Amount = (long) decimal.Round(amount * 100, 0, MidpointRounding.AwayFromZero),
             Currency = CurrencyCode.Usd,
-            Customer = stripeCustomerId,
-            AutomaticPaymentMethods = automaticPaymentMethods ?? new PaymentIntentAutomaticPaymentMethodsOptions
-            {
-                Enabled = true
-            }
+            Customer = stripeCustomerId
         };
 
         if (paymentMethodTypes != null)
             options.PaymentMethodTypes = [.. paymentMethodTypes];
+        else
+            options.AutomaticPaymentMethods = automaticPaymentMethods ?? new PaymentIntentAutomaticPaymentMethodsOptions
+            {
+                Enabled = true
+            };
 
         PaymentIntentService service = await _paymentIntentService.Get(cancellationToken).NoSync();
 
@@ -115,18 +115,11 @@ public sealed class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
         return await service.ListAsync(options, cancellationToken: cancellationToken).NoSync();
     }
 
-    /// <summary>
-    /// Releases resources used by the current instance.
-    /// </summary>
     public void Dispose()
     {
         _paymentIntentService.Dispose();
     }
 
-    /// <summary>
-    /// Asynchronously releases resources used by the current instance.
-    /// </summary>
-    /// <returns>A task that represents the asynchronous operation.</returns>
     public ValueTask DisposeAsync()
     {
         return _paymentIntentService.DisposeAsync();

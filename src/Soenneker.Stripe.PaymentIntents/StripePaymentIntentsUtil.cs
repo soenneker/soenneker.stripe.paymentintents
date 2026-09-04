@@ -13,6 +13,7 @@ using Stripe;
 
 namespace Soenneker.Stripe.PaymentIntents;
 
+/// <inheritdoc cref="IStripePaymentIntentsUtil" />
 public sealed class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
 {
     private readonly AsyncSingleton<PaymentIntentService> _paymentIntentService;

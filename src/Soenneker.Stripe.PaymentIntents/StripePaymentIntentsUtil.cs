@@ -44,7 +44,7 @@ public sealed class StripePaymentIntentsUtil : IStripePaymentIntentsUtil
         };
 
         if (paymentMethodTypes != null)
-            options.PaymentMethodTypes = [.. paymentMethodTypes];
+            options.AllowedPaymentMethodTypes = [.. paymentMethodTypes];
         else
             options.AutomaticPaymentMethods = automaticPaymentMethods ?? new PaymentIntentAutomaticPaymentMethodsOptions
             {

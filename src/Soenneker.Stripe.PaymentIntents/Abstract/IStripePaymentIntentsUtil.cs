@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Stripe;
+using Soenneker.Stripe.OpenApiClient.Models;
 
 namespace Soenneker.Stripe.PaymentIntents.Abstract;
 
@@ -32,7 +32,7 @@ public interface IStripePaymentIntentsUtil : IAsyncDisposable, IDisposable
     /// <param name="cancellationToken">Optional cancellation token.</param>
     /// <returns>The created PaymentIntent.</returns>
     ValueTask<PaymentIntent> Create(string stripeCustomerId, decimal amount, string? idempotencyKey = null, IEnumerable<string>? paymentMethodTypes = null,
-        PaymentIntentAutomaticPaymentMethodsOptions? automaticPaymentMethods = null, CancellationToken cancellationToken = default);
+        PostPaymentIntentsXWwwFormUrlencodedRequestAutomaticPaymentMethods? automaticPaymentMethods = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Retrieves a PaymentIntent by its ID.
